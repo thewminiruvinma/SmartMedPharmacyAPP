@@ -1,0 +1,481 @@
+﻿using MySql.Data.MySqlClient;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace SmartMedPharmacyAPP
+{
+    public partial class CartForm : Form
+    {
+        public CartForm()
+        {
+            InitializeComponent();
+        }
+
+        private void medicinelbl_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Searchbtn_Click(object sender, EventArgs e)
+        {
+            CustomerDashboard customerDashboard = new CustomerDashboard();
+            customerDashboard.Show();
+            this.Hide();
+        }
+
+        private void ordersbtn_Click(object sender, EventArgs e)
+        {
+            CustomerOrdersForm customerorders = new CustomerOrdersForm();
+            customerorders.Show();
+            this.Hide();
+        }
+
+        private void ProfileBtn_Click(object sender, EventArgs e)
+        {
+            ProfileForm profile = new ProfileForm();
+            profile.Show();
+            this.Hide();
+        }
+
+        private void CartForm_Load(object sender, EventArgs e)
+        {
+            LoadCart();
+        }
+
+        private void LoadCart()
+        {
+            flowCart.Controls.Clear();
+
+            decimal total = 0;
+
+            using (MySqlConnection con = new MySqlConnection(DBConnection.ConnectionString))
+            {
+                con.Open();
+
+                string query =
+                                @"SELECT
+                        c.CartID,
+                        m.Name,
+                        m.Price,
+                        c.Quantity
+                        FROM Cart c
+                        JOIN Medicine m
+                        ON c.MedicineID = m.MedicineID
+                        WHERE c.CustomerID=@CustomerID";
+
+                MySqlCommand cmd = new MySqlCommand(query, con);
+
+                cmd.Parameters.AddWithValue("@CustomerID", Session.CustomerID);
+
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                bool hasItems = false;
+
+                while (reader.Read())
+                {
+                    hasItems = true;
+
+                    Panel card = CreateCartCard(
+                        Convert.ToInt32(reader["CartID"]),
+                        reader["Name"].ToString(),
+                        Convert.ToDecimal(reader["Price"]),
+                        Convert.ToInt32(reader["Quantity"])
+                    );
+
+                    flowCart.Controls.Add(card);
+
+                    total +=
+                    Convert.ToDecimal(reader["Price"])
+                    *
+                    Convert.ToInt32(reader["Quantity"]);
+                }
+
+                lblEmptyCart.Visible = !hasItems;
+
+                lblTotal.Text =
+                "Total : Rs." + total.ToString("0.00");
+            }
+
+            if (flowCart.Controls.Count == 0)
+            {
+                lblEmptyCart.Visible = true;
+            }
+            else
+            {
+                lblEmptyCart.Visible = false;
+            }
+        }
+
+        private Panel CreateCartCard(int cartID, string medicineName, decimal price, int quantity)
+        {
+            // create the panel card for the medicine item in the cart
+            Panel card = new Panel();
+
+            card.Width = 700;
+            card.Height = 120;
+            card.BackColor = Color.White;
+            card.BorderStyle = BorderStyle.FixedSingle;
+            card.Margin = new Padding(10);
+
+            // create the labels and buttons for the card
+            Label lblName = new Label();
+
+            lblName.Text = medicineName;
+            lblName.Font = new Font("Segoe UI", 14, FontStyle.Bold);
+            lblName.Location = new Point(20, 20);
+            lblName.AutoSize = true;
+
+            Label lblPrice = new Label();
+
+            lblPrice.Text = "Rs. " + price.ToString("0.00");
+            lblPrice.Font = new Font("Segoe UI", 12);
+            lblPrice.Location = new Point(20, 60);
+            lblPrice.AutoSize = true;
+
+            Button btnMinus = new Button();
+
+            btnMinus.Text = "-";
+            btnMinus.Width = 35;
+            btnMinus.Height = 35;
+            btnMinus.Location = new Point(450, 45);
+
+            Label lblQty = new Label();
+
+            lblQty.Text = quantity.ToString();
+            lblQty.Font = new Font("Segoe UI", 12, FontStyle.Bold);
+            lblQty.Location = new Point(500, 52);
+            lblQty.AutoSize = true;
+
+            Button btnPlus = new Button();
+
+            btnPlus.Text = "+";
+            btnPlus.Width = 35;
+            btnPlus.Height = 35;
+            btnPlus.Location = new Point(550, 45);
+
+            Button btnDelete = new Button();
+
+            btnDelete.Text = "Delete";
+            btnDelete.Width = 70;
+            btnDelete.Height = 35;
+            btnDelete.BackColor = Color.Red;
+            btnDelete.ForeColor = Color.White;
+            btnDelete.FlatStyle = FlatStyle.Flat;
+
+            btnDelete.Location = new Point(620, 45);
+
+            // add event handlers for the buttons
+            card.Controls.Add(lblName);
+            card.Controls.Add(lblPrice);
+
+            card.Controls.Add(btnMinus);
+            card.Controls.Add(lblQty);
+            card.Controls.Add(btnPlus);
+
+            card.Controls.Add(btnDelete);
+
+            return card;
+
+        }
+
+        private void btnCheckout_Click(object sender, EventArgs e)
+        {
+            // Check if customer has logged in
+            if (Session.CustomerID == 0)
+            {
+                MessageBox.Show("Please login first.",
+                    "Login Required",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+                return;
+            }
+
+            // Ask for confirmation before placing the order
+            DialogResult result = MessageBox.Show(
+                "Are you sure you want to place this order?",
+                "Confirm Checkout",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (result == DialogResult.No)
+                return;
+
+            try
+            {
+                using (MySqlConnection con =
+                    new MySqlConnection(DBConnection.ConnectionString))
+                {
+                    con.Open();
+
+                    // Start Database Transaction
+                    MySqlTransaction transaction = con.BeginTransaction();
+
+                    try
+                    {
+                        // STEP 1 - Check whether the cart is empty
+                        
+
+                        string checkCartQuery =
+                        @"SELECT COUNT(*)
+                  FROM Cart
+                  WHERE CustomerID=@CustomerID";
+
+                        MySqlCommand checkCartCmd =
+                            new MySqlCommand(checkCartQuery, con, transaction);
+
+                        checkCartCmd.Parameters.AddWithValue(
+                            "@CustomerID",
+                            Session.CustomerID);
+
+                        int cartCount =
+                            Convert.ToInt32(checkCartCmd.ExecuteScalar());
+
+                        if (cartCount == 0)
+                        {
+                            MessageBox.Show(
+                                "Your cart is empty.",
+                                "Checkout",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Warning);
+
+                            transaction.Rollback();
+                            return;
+                        }
+
+                        // STEP 2 - Calculate Total Amount
+                        
+
+                        string totalQuery =
+                        @"SELECT IFNULL(SUM(SubTotal),0)
+                  FROM Cart
+                  WHERE CustomerID=@CustomerID";
+
+                        MySqlCommand totalCmd =
+                            new MySqlCommand(totalQuery, con, transaction);
+
+                        totalCmd.Parameters.AddWithValue(
+                            "@CustomerID",
+                            Session.CustomerID);
+
+                        decimal total =
+                            Convert.ToDecimal(totalCmd.ExecuteScalar());
+
+                        
+                        // STEP 3 - Create Order
+                        
+
+                        string orderQuery =
+                        @"INSERT INTO Orders
+                (CustomerID,OrderDate,TotalAmount,Status)
+
+                VALUES
+
+                (@CustomerID,@OrderDate,@TotalAmount,'Processing')";
+
+                        MySqlCommand orderCmd =
+                            new MySqlCommand(orderQuery, con, transaction);
+
+                        orderCmd.Parameters.AddWithValue(
+                            "@CustomerID",
+                            Session.CustomerID);
+
+                        orderCmd.Parameters.AddWithValue(
+                            "@OrderDate",
+                            DateTime.Now);
+
+                        orderCmd.Parameters.AddWithValue(
+                            "@TotalAmount",
+                            total);
+
+                        orderCmd.ExecuteNonQuery();
+
+                        // Get newly created OrderID
+                        int orderID =
+                            Convert.ToInt32(orderCmd.LastInsertedId);
+
+                        
+                        // STEP 4 - Read Customer Cart
+                        
+
+                        string cartQuery =
+                        @"SELECT *
+                  FROM Cart
+                  WHERE CustomerID=@CustomerID";
+
+                        MySqlCommand cartCmd =
+                            new MySqlCommand(cartQuery, con, transaction);
+
+                        cartCmd.Parameters.AddWithValue(
+                            "@CustomerID",
+                            Session.CustomerID);
+
+                        MySqlDataReader reader =
+                            cartCmd.ExecuteReader();
+
+                        DataTable cartTable =
+                            new DataTable();
+
+                        cartTable.Load(reader);
+
+                        reader.Close();
+
+                        
+                        // STEP 5 - Save Order Items
+                        
+
+                        foreach (DataRow row in cartTable.Rows)
+                        {
+                            
+                            // Check Medicine Stock
+                            
+
+                            string stockCheck =
+                            @"SELECT StockQuantity
+                      FROM Medicine
+                      WHERE MedicineID=@MedicineID";
+
+                            MySqlCommand stockCheckCmd =
+                                new MySqlCommand(stockCheck, con, transaction);
+
+                            stockCheckCmd.Parameters.AddWithValue(
+                                "@MedicineID",
+                                row["MedicineID"]);
+
+                            int currentStock =
+                                Convert.ToInt32(stockCheckCmd.ExecuteScalar());
+
+                            int orderedQty =
+                                Convert.ToInt32(row["Quantity"]);
+
+                            if (orderedQty > currentStock)
+                            {
+                                throw new Exception(
+                                    "Insufficient stock for Medicine ID: "
+                                    + row["MedicineID"]);
+                            }
+
+                            
+                            // Insert into OrderItems
+                            
+
+                            string itemQuery =
+                            @"INSERT INTO OrderItems
+                    (OrderID,MedicineID,Quantity,Price)
+
+                    VALUES
+
+                    (@OrderID,@MedicineID,@Quantity,@Price)";
+
+                            MySqlCommand itemCmd =
+                                new MySqlCommand(itemQuery, con, transaction);
+
+                            itemCmd.Parameters.AddWithValue(
+                                "@OrderID",
+                                orderID);
+
+                            itemCmd.Parameters.AddWithValue(
+                                "@MedicineID",
+                                row["MedicineID"]);
+
+                            itemCmd.Parameters.AddWithValue(
+                                "@Quantity",
+                                row["Quantity"]);
+
+                            itemCmd.Parameters.AddWithValue(
+                                "@Price",
+                                row["Price"]);
+
+                            itemCmd.ExecuteNonQuery();
+
+                            
+                            // Reduce Medicine Stock
+                            
+
+                            string updateStock =
+                            @"UPDATE Medicine
+
+                    SET StockQuantity =
+                    StockQuantity-@Quantity
+
+                    WHERE MedicineID=@MedicineID";
+
+                            MySqlCommand stockCmd =
+                                new MySqlCommand(updateStock, con, transaction);
+
+                            stockCmd.Parameters.AddWithValue(
+                                "@Quantity",
+                                row["Quantity"]);
+
+                            stockCmd.Parameters.AddWithValue(
+                                "@MedicineID",
+                                row["MedicineID"]);
+
+                            stockCmd.ExecuteNonQuery();
+                        }
+
+                        
+                        // STEP 6 - Clear Customer Cart
+                        
+
+                        string deleteCart =
+                        @"DELETE FROM Cart
+                  WHERE CustomerID=@CustomerID";
+
+                        MySqlCommand deleteCmd =
+                            new MySqlCommand(deleteCart, con, transaction);
+
+                        deleteCmd.Parameters.AddWithValue(
+                            "@CustomerID",
+                            Session.CustomerID);
+
+                        deleteCmd.ExecuteNonQuery();
+
+                        
+                        // STEP 7 - Save Everything
+                        
+
+                        transaction.Commit();
+
+                        
+                        // STEP 8 - Refresh Cart
+                        
+
+                        LoadCart();
+
+                        
+                        // STEP 9 - Success Message
+                        
+
+                        MessageBox.Show(
+                            "🎉 Your order has been placed successfully!",
+                            "Order Successful",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information);
+                    }
+                    catch (Exception)
+                    {
+                        // If any error occurs, cancel everything
+                        transaction.Rollback();
+                        throw;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    ex.Message,
+                    "Checkout Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+        }
+    }
+}
