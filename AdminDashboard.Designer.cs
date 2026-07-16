@@ -41,22 +41,25 @@
             this.Growthpanel = new System.Windows.Forms.Panel();
             this.lblTotalCustomers = new System.Windows.Forms.Label();
             this.lblTotalCustomersTitle = new System.Windows.Forms.Label();
-            this.panel7 = new System.Windows.Forms.Panel();
             this.Orderspanel = new System.Windows.Forms.Panel();
             this.lblActiveOrders = new System.Windows.Forms.Label();
             this.lblActiveOrdersTitle = new System.Windows.Forms.Label();
-            this.panel6 = new System.Windows.Forms.Panel();
             this.Stockpanel = new System.Windows.Forms.Panel();
             this.lblMedicineStock = new System.Windows.Forms.Label();
             this.lblMedicineStockTitle = new System.Windows.Forms.Label();
-            this.panel5 = new System.Windows.Forms.Panel();
             this.Salespanel = new System.Windows.Forms.Panel();
             this.lblTotalSales = new System.Windows.Forms.Label();
             this.lblTitle = new System.Windows.Forms.Label();
-            this.iconpanel = new System.Windows.Forms.Panel();
-            this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
+            this.panelExpiryAlert = new System.Windows.Forms.Panel();
+            this.lblExpiryTitle = new System.Windows.Forms.Label();
+            this.lblExpiryCount = new System.Windows.Forms.Label();
+            this.lstExpiryMedicines = new System.Windows.Forms.ListBox();
+            this.panelLowStock = new System.Windows.Forms.Panel();
+            this.lstLowStock = new System.Windows.Forms.ListBox();
+            this.lblLowStockCount = new System.Windows.Forms.Label();
+            this.lblLowStockTitle = new System.Windows.Forms.Label();
             this.panelSidebar.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.panelSales.SuspendLayout();
@@ -64,7 +67,8 @@
             this.Orderspanel.SuspendLayout();
             this.Stockpanel.SuspendLayout();
             this.Salespanel.SuspendLayout();
-            this.iconpanel.SuspendLayout();
+            this.panelExpiryAlert.SuspendLayout();
+            this.panelLowStock.SuspendLayout();
             this.SuspendLayout();
             // 
             // panelSidebar
@@ -80,7 +84,7 @@
             this.panelSidebar.Dock = System.Windows.Forms.DockStyle.Left;
             this.panelSidebar.Location = new System.Drawing.Point(0, 0);
             this.panelSidebar.Name = "panelSidebar";
-            this.panelSidebar.Size = new System.Drawing.Size(250, 450);
+            this.panelSidebar.Size = new System.Drawing.Size(250, 459);
             this.panelSidebar.TabIndex = 0;
             this.panelSidebar.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint);
             // 
@@ -103,7 +107,7 @@
             this.btnLogout.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnLogout.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnLogout.ForeColor = System.Drawing.Color.White;
-            this.btnLogout.Location = new System.Drawing.Point(0, 370);
+            this.btnLogout.Location = new System.Drawing.Point(0, 379);
             this.btnLogout.Name = "btnLogout";
             this.btnLogout.Size = new System.Drawing.Size(250, 80);
             this.btnLogout.TabIndex = 7;
@@ -191,6 +195,10 @@
             // 
             // panelSales
             // 
+            this.panelSales.AutoScroll = true;
+            this.panelSales.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.panelSales.Controls.Add(this.panelLowStock);
+            this.panelSales.Controls.Add(this.panelExpiryAlert);
             this.panelSales.Controls.Add(this.Growthpanel);
             this.panelSales.Controls.Add(this.Orderspanel);
             this.panelSales.Controls.Add(this.Stockpanel);
@@ -200,18 +208,18 @@
             this.panelSales.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelSales.Location = new System.Drawing.Point(250, 0);
             this.panelSales.Name = "panelSales";
-            this.panelSales.Size = new System.Drawing.Size(550, 450);
+            this.panelSales.Size = new System.Drawing.Size(550, 459);
             this.panelSales.TabIndex = 1;
             // 
             // Growthpanel
             // 
+            this.Growthpanel.BackColor = System.Drawing.Color.White;
             this.Growthpanel.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.Growthpanel.Controls.Add(this.lblTotalCustomers);
             this.Growthpanel.Controls.Add(this.lblTotalCustomersTitle);
-            this.Growthpanel.Controls.Add(this.panel7);
-            this.Growthpanel.Location = new System.Drawing.Point(282, 264);
+            this.Growthpanel.Location = new System.Drawing.Point(282, 246);
             this.Growthpanel.Name = "Growthpanel";
-            this.Growthpanel.Size = new System.Drawing.Size(242, 124);
+            this.Growthpanel.Size = new System.Drawing.Size(223, 107);
             this.Growthpanel.TabIndex = 5;
             // 
             // lblTotalCustomers
@@ -223,35 +231,28 @@
             this.lblTotalCustomers.Size = new System.Drawing.Size(88, 30);
             this.lblTotalCustomers.TabIndex = 2;
             this.lblTotalCustomers.Text = "+12.5%";
+            this.lblTotalCustomers.Click += new System.EventHandler(this.lblTotalCustomers_Click);
             // 
             // lblTotalCustomersTitle
             // 
             this.lblTotalCustomersTitle.AutoSize = true;
-            this.lblTotalCustomersTitle.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblTotalCustomersTitle.Font = new System.Drawing.Font("Segoe UI Semibold", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblTotalCustomersTitle.ForeColor = System.Drawing.SystemColors.GrayText;
-            this.lblTotalCustomersTitle.Location = new System.Drawing.Point(62, 17);
+            this.lblTotalCustomersTitle.Location = new System.Drawing.Point(12, 17);
             this.lblTotalCustomersTitle.Name = "lblTotalCustomersTitle";
-            this.lblTotalCustomersTitle.Size = new System.Drawing.Size(102, 17);
+            this.lblTotalCustomersTitle.Size = new System.Drawing.Size(117, 20);
             this.lblTotalCustomersTitle.TabIndex = 1;
             this.lblTotalCustomersTitle.Text = "Total Customers";
             // 
-            // panel7
-            // 
-            this.panel7.BackColor = System.Drawing.Color.Goldenrod;
-            this.panel7.Location = new System.Drawing.Point(20, 19);
-            this.panel7.Name = "panel7";
-            this.panel7.Size = new System.Drawing.Size(37, 33);
-            this.panel7.TabIndex = 0;
-            // 
             // Orderspanel
             // 
+            this.Orderspanel.BackColor = System.Drawing.Color.White;
             this.Orderspanel.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.Orderspanel.Controls.Add(this.lblActiveOrders);
             this.Orderspanel.Controls.Add(this.lblActiveOrdersTitle);
-            this.Orderspanel.Controls.Add(this.panel6);
-            this.Orderspanel.Location = new System.Drawing.Point(29, 264);
+            this.Orderspanel.Location = new System.Drawing.Point(29, 246);
             this.Orderspanel.Name = "Orderspanel";
-            this.Orderspanel.Size = new System.Drawing.Size(242, 124);
+            this.Orderspanel.Size = new System.Drawing.Size(223, 107);
             this.Orderspanel.TabIndex = 4;
             // 
             // lblActiveOrders
@@ -267,31 +268,23 @@
             // lblActiveOrdersTitle
             // 
             this.lblActiveOrdersTitle.AutoSize = true;
-            this.lblActiveOrdersTitle.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblActiveOrdersTitle.Font = new System.Drawing.Font("Segoe UI Semibold", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblActiveOrdersTitle.ForeColor = System.Drawing.SystemColors.GrayText;
-            this.lblActiveOrdersTitle.Location = new System.Drawing.Point(62, 17);
+            this.lblActiveOrdersTitle.Location = new System.Drawing.Point(12, 17);
             this.lblActiveOrdersTitle.Name = "lblActiveOrdersTitle";
-            this.lblActiveOrdersTitle.Size = new System.Drawing.Size(87, 17);
+            this.lblActiveOrdersTitle.Size = new System.Drawing.Size(101, 20);
             this.lblActiveOrdersTitle.TabIndex = 1;
             this.lblActiveOrdersTitle.Text = "Active Orders";
             // 
-            // panel6
-            // 
-            this.panel6.BackColor = System.Drawing.Color.Violet;
-            this.panel6.Location = new System.Drawing.Point(20, 19);
-            this.panel6.Name = "panel6";
-            this.panel6.Size = new System.Drawing.Size(37, 33);
-            this.panel6.TabIndex = 0;
-            // 
             // Stockpanel
             // 
+            this.Stockpanel.BackColor = System.Drawing.Color.White;
             this.Stockpanel.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.Stockpanel.Controls.Add(this.lblMedicineStock);
             this.Stockpanel.Controls.Add(this.lblMedicineStockTitle);
-            this.Stockpanel.Controls.Add(this.panel5);
             this.Stockpanel.Location = new System.Drawing.Point(282, 117);
             this.Stockpanel.Name = "Stockpanel";
-            this.Stockpanel.Size = new System.Drawing.Size(242, 124);
+            this.Stockpanel.Size = new System.Drawing.Size(223, 107);
             this.Stockpanel.TabIndex = 3;
             // 
             // lblMedicineStock
@@ -307,33 +300,24 @@
             // lblMedicineStockTitle
             // 
             this.lblMedicineStockTitle.AutoSize = true;
-            this.lblMedicineStockTitle.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblMedicineStockTitle.Font = new System.Drawing.Font("Segoe UI Semibold", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblMedicineStockTitle.ForeColor = System.Drawing.SystemColors.GrayText;
-            this.lblMedicineStockTitle.Location = new System.Drawing.Point(62, 17);
+            this.lblMedicineStockTitle.Location = new System.Drawing.Point(12, 17);
             this.lblMedicineStockTitle.Name = "lblMedicineStockTitle";
-            this.lblMedicineStockTitle.Size = new System.Drawing.Size(110, 17);
+            this.lblMedicineStockTitle.Size = new System.Drawing.Size(130, 20);
             this.lblMedicineStockTitle.TabIndex = 2;
             this.lblMedicineStockTitle.Text = "Medicine in Stock";
             this.lblMedicineStockTitle.Click += new System.EventHandler(this.label7_Click_1);
             // 
-            // panel5
-            // 
-            this.panel5.BackColor = System.Drawing.Color.DodgerBlue;
-            this.panel5.Location = new System.Drawing.Point(20, 19);
-            this.panel5.Name = "panel5";
-            this.panel5.Size = new System.Drawing.Size(37, 33);
-            this.panel5.TabIndex = 1;
-            this.panel5.Paint += new System.Windows.Forms.PaintEventHandler(this.panel5_Paint);
-            // 
             // Salespanel
             // 
+            this.Salespanel.BackColor = System.Drawing.Color.White;
             this.Salespanel.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.Salespanel.Controls.Add(this.lblTotalSales);
             this.Salespanel.Controls.Add(this.lblTitle);
-            this.Salespanel.Controls.Add(this.iconpanel);
             this.Salespanel.Location = new System.Drawing.Point(28, 117);
             this.Salespanel.Name = "Salespanel";
-            this.Salespanel.Size = new System.Drawing.Size(242, 124);
+            this.Salespanel.Size = new System.Drawing.Size(223, 107);
             this.Salespanel.TabIndex = 2;
             this.Salespanel.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint_1);
             // 
@@ -341,7 +325,7 @@
             // 
             this.lblTotalSales.AutoSize = true;
             this.lblTotalSales.Font = new System.Drawing.Font("Segoe UI", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblTotalSales.Location = new System.Drawing.Point(93, 52);
+            this.lblTotalSales.Location = new System.Drawing.Point(84, 52);
             this.lblTotalSales.Name = "lblTotalSales";
             this.lblTotalSales.Size = new System.Drawing.Size(91, 30);
             this.lblTotalSales.TabIndex = 2;
@@ -350,34 +334,14 @@
             // lblTitle
             // 
             this.lblTitle.AutoSize = true;
-            this.lblTitle.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblTitle.Font = new System.Drawing.Font("Segoe UI Semibold", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblTitle.ForeColor = System.Drawing.Color.LightSlateGray;
-            this.lblTitle.Location = new System.Drawing.Point(62, 17);
+            this.lblTitle.Location = new System.Drawing.Point(12, 17);
             this.lblTitle.Name = "lblTitle";
-            this.lblTitle.Size = new System.Drawing.Size(70, 17);
+            this.lblTitle.Size = new System.Drawing.Size(80, 20);
             this.lblTitle.TabIndex = 1;
             this.lblTitle.Text = "Total Sales";
             this.lblTitle.Click += new System.EventHandler(this.label6_Click);
-            // 
-            // iconpanel
-            // 
-            this.iconpanel.BackColor = System.Drawing.Color.LimeGreen;
-            this.iconpanel.Controls.Add(this.label5);
-            this.iconpanel.Location = new System.Drawing.Point(19, 17);
-            this.iconpanel.Name = "iconpanel";
-            this.iconpanel.Size = new System.Drawing.Size(37, 33);
-            this.iconpanel.TabIndex = 0;
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label5.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.label5.Location = new System.Drawing.Point(9, 6);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(19, 21);
-            this.label5.TabIndex = 0;
-            this.label5.Text = "$";
             // 
             // label4
             // 
@@ -401,12 +365,100 @@
             this.label3.TabIndex = 0;
             this.label3.Text = "Dashboard";
             // 
+            // panelExpiryAlert
+            // 
+            this.panelExpiryAlert.BackColor = System.Drawing.Color.White;
+            this.panelExpiryAlert.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panelExpiryAlert.Controls.Add(this.lstExpiryMedicines);
+            this.panelExpiryAlert.Controls.Add(this.lblExpiryCount);
+            this.panelExpiryAlert.Controls.Add(this.lblExpiryTitle);
+            this.panelExpiryAlert.Location = new System.Drawing.Point(28, 379);
+            this.panelExpiryAlert.Name = "panelExpiryAlert";
+            this.panelExpiryAlert.Size = new System.Drawing.Size(224, 215);
+            this.panelExpiryAlert.TabIndex = 6;
+            // 
+            // lblExpiryTitle
+            // 
+            this.lblExpiryTitle.AutoSize = true;
+            this.lblExpiryTitle.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblExpiryTitle.ForeColor = System.Drawing.Color.Firebrick;
+            this.lblExpiryTitle.Location = new System.Drawing.Point(16, 27);
+            this.lblExpiryTitle.Name = "lblExpiryTitle";
+            this.lblExpiryTitle.Size = new System.Drawing.Size(148, 17);
+            this.lblExpiryTitle.TabIndex = 0;
+            this.lblExpiryTitle.Text = "⚠ Expiring Medicines";
+            // 
+            // lblExpiryCount
+            // 
+            this.lblExpiryCount.AutoSize = true;
+            this.lblExpiryCount.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblExpiryCount.Location = new System.Drawing.Point(20, 169);
+            this.lblExpiryCount.Name = "lblExpiryCount";
+            this.lblExpiryCount.Size = new System.Drawing.Size(54, 17);
+            this.lblExpiryCount.TabIndex = 1;
+            this.lblExpiryCount.Text = "Total : 0";
+            // 
+            // lstExpiryMedicines
+            // 
+            this.lstExpiryMedicines.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.lstExpiryMedicines.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lstExpiryMedicines.FormattingEnabled = true;
+            this.lstExpiryMedicines.ItemHeight = 17;
+            this.lstExpiryMedicines.Location = new System.Drawing.Point(19, 63);
+            this.lstExpiryMedicines.Name = "lstExpiryMedicines";
+            this.lstExpiryMedicines.Size = new System.Drawing.Size(172, 85);
+            this.lstExpiryMedicines.TabIndex = 2;
+            // 
+            // panelLowStock
+            // 
+            this.panelLowStock.BackColor = System.Drawing.Color.White;
+            this.panelLowStock.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panelLowStock.Controls.Add(this.lstLowStock);
+            this.panelLowStock.Controls.Add(this.lblLowStockCount);
+            this.panelLowStock.Controls.Add(this.lblLowStockTitle);
+            this.panelLowStock.Location = new System.Drawing.Point(281, 381);
+            this.panelLowStock.Name = "panelLowStock";
+            this.panelLowStock.Size = new System.Drawing.Size(224, 215);
+            this.panelLowStock.TabIndex = 7;
+            // 
+            // lstLowStock
+            // 
+            this.lstLowStock.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.lstLowStock.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lstLowStock.FormattingEnabled = true;
+            this.lstLowStock.ItemHeight = 17;
+            this.lstLowStock.Location = new System.Drawing.Point(19, 63);
+            this.lstLowStock.Name = "lstLowStock";
+            this.lstLowStock.Size = new System.Drawing.Size(172, 85);
+            this.lstLowStock.TabIndex = 2;
+            // 
+            // lblLowStockCount
+            // 
+            this.lblLowStockCount.AutoSize = true;
+            this.lblLowStockCount.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblLowStockCount.Location = new System.Drawing.Point(20, 169);
+            this.lblLowStockCount.Name = "lblLowStockCount";
+            this.lblLowStockCount.Size = new System.Drawing.Size(54, 17);
+            this.lblLowStockCount.TabIndex = 1;
+            this.lblLowStockCount.Text = "Total : 0";
+            // 
+            // lblLowStockTitle
+            // 
+            this.lblLowStockTitle.AutoSize = true;
+            this.lblLowStockTitle.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblLowStockTitle.ForeColor = System.Drawing.Color.DarkOrange;
+            this.lblLowStockTitle.Location = new System.Drawing.Point(16, 27);
+            this.lblLowStockTitle.Name = "lblLowStockTitle";
+            this.lblLowStockTitle.Size = new System.Drawing.Size(127, 17);
+            this.lblLowStockTitle.TabIndex = 0;
+            this.lblLowStockTitle.Text = "⚠ Low Stock Alert";
+            // 
             // AdminDashboard
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(800, 459);
             this.Controls.Add(this.panelSales);
             this.Controls.Add(this.panelSidebar);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
@@ -425,8 +477,10 @@
             this.Stockpanel.PerformLayout();
             this.Salespanel.ResumeLayout(false);
             this.Salespanel.PerformLayout();
-            this.iconpanel.ResumeLayout(false);
-            this.iconpanel.PerformLayout();
+            this.panelExpiryAlert.ResumeLayout(false);
+            this.panelExpiryAlert.PerformLayout();
+            this.panelLowStock.ResumeLayout(false);
+            this.panelLowStock.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -447,19 +501,22 @@
         private System.Windows.Forms.Panel Growthpanel;
         private System.Windows.Forms.Panel Orderspanel;
         private System.Windows.Forms.Panel Stockpanel;
-        private System.Windows.Forms.Panel iconpanel;
-        private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label lblTitle;
         private System.Windows.Forms.Label lblTotalSales;
-        private System.Windows.Forms.Panel panel5;
         private System.Windows.Forms.Label lblMedicineStockTitle;
         private System.Windows.Forms.Label lblMedicineStock;
-        private System.Windows.Forms.Panel panel7;
-        private System.Windows.Forms.Panel panel6;
         private System.Windows.Forms.Label lblActiveOrdersTitle;
         private System.Windows.Forms.Label lblTotalCustomers;
         private System.Windows.Forms.Label lblTotalCustomersTitle;
         private System.Windows.Forms.Label lblActiveOrders;
         private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.Panel panelExpiryAlert;
+        private System.Windows.Forms.ListBox lstExpiryMedicines;
+        private System.Windows.Forms.Label lblExpiryCount;
+        private System.Windows.Forms.Label lblExpiryTitle;
+        private System.Windows.Forms.Panel panelLowStock;
+        private System.Windows.Forms.ListBox lstLowStock;
+        private System.Windows.Forms.Label lblLowStockCount;
+        private System.Windows.Forms.Label lblLowStockTitle;
     }
 }

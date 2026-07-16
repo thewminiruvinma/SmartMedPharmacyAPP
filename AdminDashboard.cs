@@ -84,6 +84,8 @@ namespace SmartMedPharmacyAPP
         private void AdminDashboard_Load(object sender, EventArgs e)
         {
             LoadDashboard();
+            LoadExpiryAlerts();
+            LoadLowStockAlert();
         }
 
         // Load dashboard data
@@ -191,6 +193,121 @@ namespace SmartMedPharmacyAPP
                 lblTotalCustomers.Text =
                     customers.ToString();
             }
+        }
+
+        // Load expiry alerts from the database
+        private void LoadExpiryAlerts()
+        {
+            lstExpiryMedicines.Items.Clear();
+
+            using (MySqlConnection con =
+                new MySqlConnection(DBConnection.ConnectionString))
+            {
+                con.Open();
+
+                string query = @"
+        SELECT
+            Name,
+            ExpiryDate
+        FROM Medicine
+        WHERE ExpiryDate BETWEEN CURDATE()
+        AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+        ORDER BY ExpiryDate";
+
+                MySqlCommand cmd = new MySqlCommand(query, con);
+
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                int count = 0;
+
+                while (reader.Read())
+                {
+                    string medicine = reader["Name"].ToString();
+
+                    DateTime expiry =
+                        Convert.ToDateTime(reader["ExpiryDate"]);
+
+                    int days =
+                        (expiry - DateTime.Today).Days;
+
+                    if (days <= 7)
+                    {
+                        lstExpiryMedicines.Items.Add(
+                            "🚨 " + medicine + " (" + days + " days)");
+                    }
+                    else
+                    {
+                        lstExpiryMedicines.Items.Add(
+                            "⚠ " + medicine + " (" + days + " days)");
+                    }
+
+                    count++;
+                }
+
+                lblExpiryCount.Text = "Total : " + count;
+            }
+        }
+
+        // Load low stock alerts from the database
+        private void LoadLowStockAlert()
+        {
+            lstLowStock.Items.Clear();
+
+            using (MySqlConnection con =
+                new MySqlConnection(DBConnection.ConnectionString))
+            {
+                con.Open();
+
+                string query = @"
+                    SELECT Name, StockQuantity
+                    FROM Medicine
+                    WHERE StockQuantity < 10
+                    ORDER BY StockQuantity ASC";
+
+                MySqlCommand cmd = new MySqlCommand(query, con);
+
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                int count = 0;
+
+                while (reader.Read())
+                {
+                    string medicine = reader["Name"].ToString();
+                    int stock = Convert.ToInt32(reader["StockQuantity"]);
+
+                    if (stock <= 5)
+                    {
+                        lstLowStock.Items.Add(
+                            "🚨 " + medicine + " (Stock: " + stock + ")");
+                    }
+                    else
+                    {
+                        lstLowStock.Items.Add(
+                            "⚠ " + medicine + " (Stock: " + stock + ")");
+                    }
+
+                    count++;
+                }
+
+                reader.Close();
+
+                lblLowStockCount.Text = "Total : " + count;
+
+                // Change panel colour
+                if (count > 0)
+                {
+                    panelLowStock.BackColor = Color.MistyRose;
+                }
+                else
+                {
+                    panelLowStock.BackColor = Color.Honeydew;
+                }
+            }
+        }
+
+        private void lblTotalCustomers_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
