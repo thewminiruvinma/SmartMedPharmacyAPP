@@ -32,8 +32,8 @@ namespace SmartMedPharmacyAPP
 
         private void btnCart_Click(object sender, EventArgs e)
         {
-            CartForm cart = new CartForm();
-            cart.Show();
+            CartForm cartform = new CartForm();
+            cartform.Show();
             this.Hide();
         }
 
@@ -211,15 +211,32 @@ namespace SmartMedPharmacyAPP
             return card;
         }
 
-        // Method to process adding an item or updating item quantities within the database shopping cart
         private void AddToCart(int medicineID)
         {
             using (MySqlConnection con = new MySqlConnection(DBConnection.ConnectionString))
             {
                 con.Open();
 
-                // Check if the item already exists in this customer's active cart session
-                string checkQuery = @"SELECT Quantity FROM Cart WHERE CustomerID=@CustomerID AND MedicineID=@MedicineID";
+                // Get the medicine price
+                decimal price = 0;
+
+                string priceQuery = "SELECT Price FROM Medicine WHERE MedicineID=@MedicineID";
+
+                MySqlCommand priceCmd = new MySqlCommand(priceQuery, con);
+                priceCmd.Parameters.AddWithValue("@MedicineID", medicineID);
+
+                object priceResult = priceCmd.ExecuteScalar();
+
+                if (priceResult != null)
+                {
+                    price = Convert.ToDecimal(priceResult);
+                }
+
+                // Check if medicine already exists in cart
+                string checkQuery = @"SELECT Quantity
+                              FROM Cart
+                              WHERE CustomerID=@CustomerID
+                              AND MedicineID=@MedicineID";
 
                 MySqlCommand checkCmd = new MySqlCommand(checkQuery, con);
                 checkCmd.Parameters.AddWithValue("@CustomerID", Session.CustomerID);
@@ -229,10 +246,23 @@ namespace SmartMedPharmacyAPP
 
                 if (result != null)
                 {
-                    // Item exists; Increment the existing row count by 1
-                    string updateQuery = @"UPDATE Cart SET Quantity = Quantity + 1 WHERE CustomerID=@CustomerID AND MedicineID=@MedicineID";
+                    // Medicine already exists
+
+                    int quantity = Convert.ToInt32(result) + 1;
+                    decimal subtotal = quantity * price;
+
+                    string updateQuery = @"UPDATE Cart
+                                   SET Quantity=@Quantity,
+                                       Price=@Price,
+                                       SubTotal=@SubTotal
+                                   WHERE CustomerID=@CustomerID
+                                   AND MedicineID=@MedicineID";
 
                     MySqlCommand updateCmd = new MySqlCommand(updateQuery, con);
+
+                    updateCmd.Parameters.AddWithValue("@Quantity", quantity);
+                    updateCmd.Parameters.AddWithValue("@Price", price);
+                    updateCmd.Parameters.AddWithValue("@SubTotal", subtotal);
                     updateCmd.Parameters.AddWithValue("@CustomerID", Session.CustomerID);
                     updateCmd.Parameters.AddWithValue("@MedicineID", medicineID);
 
@@ -240,17 +270,23 @@ namespace SmartMedPharmacyAPP
                 }
                 else
                 {
-                    // Item does not exist; Insert a brand new row entry
-                    string insertQuery = @"INSERT INTO Cart (CustomerID, MedicineID, Quantity) VALUES (@CustomerID, @MedicineID, 1)";
+                    // Insert new medicine into cart
+
+                    string insertQuery = @"INSERT INTO Cart
+                                  (CustomerID, MedicineID, Quantity, Price, SubTotal)
+                                  VALUES
+                                  (@CustomerID, @MedicineID, 1, @Price, @SubTotal)";
 
                     MySqlCommand insertCmd = new MySqlCommand(insertQuery, con);
+
                     insertCmd.Parameters.AddWithValue("@CustomerID", Session.CustomerID);
                     insertCmd.Parameters.AddWithValue("@MedicineID", medicineID);
+                    insertCmd.Parameters.AddWithValue("@Price", price);
+                    insertCmd.Parameters.AddWithValue("@SubTotal", price);
 
                     insertCmd.ExecuteNonQuery();
                 }
 
-                // Display feedback message box
                 MessageBox.Show("Medicine added to cart successfully!");
             }
         }

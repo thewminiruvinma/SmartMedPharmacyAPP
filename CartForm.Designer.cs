@@ -270,7 +270,6 @@
             this.Controls.Add(this.Leftpanel);
             this.Name = "CartForm";
             this.Text = "CartForm";
-            this.WindowState = System.Windows.Forms.FormWindowState.Minimized;
             this.Load += new System.EventHandler(this.CartForm_Load);
             this.Leftpanel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.picboxLogo)).EndInit();

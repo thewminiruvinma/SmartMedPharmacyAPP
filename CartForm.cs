@@ -181,8 +181,107 @@ namespace SmartMedPharmacyAPP
 
             card.Controls.Add(btnDelete);
 
+            // Plus button
+            btnPlus.Click += (s, e) =>
+            {
+                UpdateQuantity(cartID, 1);
+            };
+
+            // Minus button
+            btnMinus.Click += (s, e) =>
+            {
+                UpdateQuantity(cartID, -1);
+            };
+
+            // Delete button
+            btnDelete.Click += (s, e) =>
+            {
+                DeleteCartItem(cartID);
+            };
+
             return card;
 
+        }
+
+        // Update quantity of cart item
+        private void UpdateQuantity(int cartID, int change)
+        {
+            using (MySqlConnection con = new MySqlConnection(DBConnection.ConnectionString))
+            {
+                con.Open();
+
+                // Get current quantity and price
+                string selectQuery = @"SELECT Quantity, Price
+                               FROM Cart
+                               WHERE CartID=@CartID";
+
+                MySqlCommand selectCmd = new MySqlCommand(selectQuery, con);
+                selectCmd.Parameters.AddWithValue("@CartID", cartID);
+
+                MySqlDataReader reader = selectCmd.ExecuteReader();
+
+                if (!reader.Read())
+                    return;
+
+                int quantity = Convert.ToInt32(reader["Quantity"]);
+                decimal price = Convert.ToDecimal(reader["Price"]);
+
+                reader.Close();
+
+                quantity += change;
+
+                // Remove item if quantity becomes 0
+                if (quantity <= 0)
+                {
+                    DeleteCartItem(cartID);
+                    return;
+                }
+
+                decimal subtotal = quantity * price;
+
+                string updateQuery = @"UPDATE Cart
+                               SET Quantity=@Quantity,
+                                   SubTotal=@SubTotal
+                               WHERE CartID=@CartID";
+
+                MySqlCommand updateCmd = new MySqlCommand(updateQuery, con);
+
+                updateCmd.Parameters.AddWithValue("@Quantity", quantity);
+                updateCmd.Parameters.AddWithValue("@SubTotal", subtotal);
+                updateCmd.Parameters.AddWithValue("@CartID", cartID);
+
+                updateCmd.ExecuteNonQuery();
+            }
+
+            LoadCart();
+        }
+
+        // Delete cart item
+        private void DeleteCartItem(int cartID)
+        {
+            DialogResult result = MessageBox.Show(
+                "Remove this medicine from cart?",
+                "Confirm Delete",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (result == DialogResult.No)
+                return;
+
+            using (MySqlConnection con = new MySqlConnection(DBConnection.ConnectionString))
+            {
+                con.Open();
+
+                string query = "DELETE FROM Cart WHERE CartID=@CartID";
+
+                MySqlCommand cmd = new MySqlCommand(query, con);
+
+                cmd.Parameters.AddWithValue("@CartID", cartID);
+
+                cmd.ExecuteNonQuery();
+            }
+
+            LoadCart();
         }
 
         private void btnCheckout_Click(object sender, EventArgs e)
@@ -362,17 +461,17 @@ namespace SmartMedPharmacyAPP
                                     + row["MedicineID"]);
                             }
 
-                            
+
                             // Insert into OrderItems
-                            
+
 
                             string itemQuery =
-                            @"INSERT INTO OrderItems
-                    (OrderID,MedicineID,Quantity,Price)
+                                      @"INSERT INTO OrderItems
+                                    (OrderID,MedicineID,Quantity,UnitPrice)
 
-                    VALUES
+                                    VALUES
 
-                    (@OrderID,@MedicineID,@Quantity,@Price)";
+                                    (@OrderID,@MedicineID,@Quantity,@UnitPrice)";
 
                             MySqlCommand itemCmd =
                                 new MySqlCommand(itemQuery, con, transaction);
@@ -390,7 +489,7 @@ namespace SmartMedPharmacyAPP
                                 row["Quantity"]);
 
                             itemCmd.Parameters.AddWithValue(
-                                "@Price",
+                                "@UnitPrice", 
                                 row["Price"]);
 
                             itemCmd.ExecuteNonQuery();
