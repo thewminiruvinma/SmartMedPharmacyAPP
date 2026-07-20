@@ -38,7 +38,6 @@
             this.picboxLogo = new System.Windows.Forms.PictureBox();
             this.Rightpanel = new System.Windows.Forms.Panel();
             this.flpMedicines = new System.Windows.Forms.FlowLayoutPanel();
-            this.pnlNotifications = new System.Windows.Forms.Panel();
             this.label1 = new System.Windows.Forms.Label();
             this.labelTitle = new System.Windows.Forms.Label();
             this.Searchpanel = new System.Windows.Forms.Panel();
@@ -160,7 +159,6 @@
             // 
             this.Rightpanel.BackColor = System.Drawing.Color.WhiteSmoke;
             this.Rightpanel.Controls.Add(this.flpMedicines);
-            this.Rightpanel.Controls.Add(this.pnlNotifications);
             this.Rightpanel.Controls.Add(this.label1);
             this.Rightpanel.Controls.Add(this.labelTitle);
             this.Rightpanel.Controls.Add(this.Searchpanel);
@@ -179,14 +177,6 @@
             this.flpMedicines.Size = new System.Drawing.Size(566, 271);
             this.flpMedicines.TabIndex = 7;
             this.flpMedicines.Paint += new System.Windows.Forms.PaintEventHandler(this.flpMedicines_Paint);
-            // 
-            // pnlNotifications
-            // 
-            this.pnlNotifications.BackColor = System.Drawing.Color.Gray;
-            this.pnlNotifications.Location = new System.Drawing.Point(546, 16);
-            this.pnlNotifications.Name = "pnlNotifications";
-            this.pnlNotifications.Size = new System.Drawing.Size(33, 30);
-            this.pnlNotifications.TabIndex = 5;
             // 
             // label1
             // 
@@ -275,7 +265,6 @@
         private System.Windows.Forms.Button ProfileBtn;
         private System.Windows.Forms.Button ordersbtn;
         private System.Windows.Forms.Button btnCart;
-        private System.Windows.Forms.Panel pnlNotifications;
         private System.Windows.Forms.Button logoutbtn;
         private System.Windows.Forms.FlowLayoutPanel flpMedicines;
     }

@@ -44,7 +44,6 @@
             this.txtEmail = new System.Windows.Forms.TextBox();
             this.txtFullName = new System.Windows.Forms.TextBox();
             this.lblProfileInfo = new System.Windows.Forms.Label();
-            this.pnlNotifications = new System.Windows.Forms.Panel();
             this.label1 = new System.Windows.Forms.Label();
             this.labelProfile = new System.Windows.Forms.Label();
             this.Leftpanel.SuspendLayout();
@@ -162,7 +161,6 @@
             // 
             this.Rightpanel.BackColor = System.Drawing.Color.WhiteSmoke;
             this.Rightpanel.Controls.Add(this.panelProfileInfo);
-            this.Rightpanel.Controls.Add(this.pnlNotifications);
             this.Rightpanel.Controls.Add(this.label1);
             this.Rightpanel.Controls.Add(this.labelProfile);
             this.Rightpanel.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -244,14 +242,6 @@
             this.lblProfileInfo.TabIndex = 0;
             this.lblProfileInfo.Text = "Profile Information";
             // 
-            // pnlNotifications
-            // 
-            this.pnlNotifications.BackColor = System.Drawing.Color.Gray;
-            this.pnlNotifications.Location = new System.Drawing.Point(555, 17);
-            this.pnlNotifications.Name = "pnlNotifications";
-            this.pnlNotifications.Size = new System.Drawing.Size(33, 30);
-            this.pnlNotifications.TabIndex = 5;
-            // 
             // label1
             // 
             this.label1.AutoSize = true;
@@ -304,7 +294,6 @@
         private System.Windows.Forms.PictureBox picboxLogo;
         private System.Windows.Forms.Panel Rightpanel;
         private System.Windows.Forms.Panel panelProfileInfo;
-        private System.Windows.Forms.Panel pnlNotifications;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label labelProfile;
         private System.Windows.Forms.TextBox txtAddress;

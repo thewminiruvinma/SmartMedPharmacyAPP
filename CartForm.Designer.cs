@@ -39,7 +39,6 @@
             this.Rightpanel = new System.Windows.Forms.Panel();
             this.flowCart = new System.Windows.Forms.FlowLayoutPanel();
             this.lblEmptyCart = new System.Windows.Forms.Label();
-            this.pnlNotifications = new System.Windows.Forms.Panel();
             this.pnlCheckoutCard = new System.Windows.Forms.Panel();
             this.btnCheckout = new System.Windows.Forms.Button();
             this.lblTotal = new System.Windows.Forms.Label();
@@ -160,7 +159,6 @@
             // 
             this.Rightpanel.BackColor = System.Drawing.Color.WhiteSmoke;
             this.Rightpanel.Controls.Add(this.flowCart);
-            this.Rightpanel.Controls.Add(this.pnlNotifications);
             this.Rightpanel.Controls.Add(this.pnlCheckoutCard);
             this.Rightpanel.Controls.Add(this.label1);
             this.Rightpanel.Controls.Add(this.labelTitle);
@@ -192,14 +190,6 @@
             this.lblEmptyCart.Size = new System.Drawing.Size(223, 32);
             this.lblEmptyCart.TabIndex = 0;
             this.lblEmptyCart.Text = "Your cart is empty";
-            // 
-            // pnlNotifications
-            // 
-            this.pnlNotifications.BackColor = System.Drawing.Color.Gray;
-            this.pnlNotifications.Location = new System.Drawing.Point(542, 16);
-            this.pnlNotifications.Name = "pnlNotifications";
-            this.pnlNotifications.Size = new System.Drawing.Size(33, 30);
-            this.pnlNotifications.TabIndex = 5;
             // 
             // pnlCheckoutCard
             // 
@@ -293,7 +283,6 @@
         private System.Windows.Forms.Button Searchbtn;
         private System.Windows.Forms.PictureBox picboxLogo;
         private System.Windows.Forms.Panel Rightpanel;
-        private System.Windows.Forms.Panel pnlNotifications;
         private System.Windows.Forms.Panel pnlCheckoutCard;
         private System.Windows.Forms.Button btnCheckout;
         private System.Windows.Forms.Label lblTotal;

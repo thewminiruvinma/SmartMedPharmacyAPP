@@ -44,7 +44,6 @@ namespace SmartMedPharmacyAPP
             this.panelSearch = new System.Windows.Forms.Panel();
             this.cmbStatus = new System.Windows.Forms.ComboBox();
             this.txtSearch = new System.Windows.Forms.TextBox();
-            this.pnlNotifications = new System.Windows.Forms.Panel();
             this.label1 = new System.Windows.Forms.Label();
             this.labelOrders = new System.Windows.Forms.Label();
             this.Leftpanel.SuspendLayout();
@@ -164,7 +163,6 @@ namespace SmartMedPharmacyAPP
             this.Rightpanel.BackColor = System.Drawing.Color.WhiteSmoke;
             this.Rightpanel.Controls.Add(this.dgvOrders);
             this.Rightpanel.Controls.Add(this.panelSearch);
-            this.Rightpanel.Controls.Add(this.pnlNotifications);
             this.Rightpanel.Controls.Add(this.label1);
             this.Rightpanel.Controls.Add(this.labelOrders);
             this.Rightpanel.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -223,19 +221,11 @@ namespace SmartMedPharmacyAPP
             this.txtSearch.Enter += new System.EventHandler(this.txtSearchOrders_Enter);
             this.txtSearch.Leave += new System.EventHandler(this.txtSearchOrders_Leave);
             // 
-            // pnlNotifications
-            // 
-            this.pnlNotifications.BackColor = System.Drawing.Color.Gray;
-            this.pnlNotifications.Location = new System.Drawing.Point(421, 16);
-            this.pnlNotifications.Name = "pnlNotifications";
-            this.pnlNotifications.Size = new System.Drawing.Size(33, 30);
-            this.pnlNotifications.TabIndex = 5;
-            // 
             // label1
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(29, 50);
+            this.label1.Location = new System.Drawing.Point(29, 56);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(133, 13);
             this.label1.TabIndex = 2;
@@ -246,7 +236,7 @@ namespace SmartMedPharmacyAPP
             this.labelOrders.AutoSize = true;
             this.labelOrders.Font = new System.Drawing.Font("Segoe UI", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelOrders.ForeColor = System.Drawing.Color.MidnightBlue;
-            this.labelOrders.Location = new System.Drawing.Point(21, 9);
+            this.labelOrders.Location = new System.Drawing.Point(21, 15);
             this.labelOrders.Name = "labelOrders";
             this.labelOrders.Size = new System.Drawing.Size(151, 37);
             this.labelOrders.TabIndex = 1;
@@ -306,7 +296,6 @@ namespace SmartMedPharmacyAPP
         private System.Windows.Forms.Button Searchbtn;
         private System.Windows.Forms.PictureBox picboxLogo;
         private System.Windows.Forms.Panel Rightpanel;
-        private System.Windows.Forms.Panel pnlNotifications;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label labelOrders;
         private System.Windows.Forms.Panel panelSearch;

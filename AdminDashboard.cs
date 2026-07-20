@@ -86,6 +86,7 @@ namespace SmartMedPharmacyAPP
             LoadDashboard();
             LoadExpiryAlerts();
             LoadLowStockAlert();
+            LoadBestSellingMedicine();
         }
 
         // Load dashboard data
@@ -302,6 +303,61 @@ namespace SmartMedPharmacyAPP
                 {
                     panelLowStock.BackColor = Color.Honeydew;
                 }
+            }
+        }
+
+        // Load best selling medicine from the database
+        private void LoadBestSellingMedicine()
+        {
+            using (MySqlConnection con =
+                new MySqlConnection(DBConnection.ConnectionString))
+            {
+                con.Open();
+
+                string query = @"
+        SELECT
+            m.Name,
+            SUM(oi.Quantity) AS TotalSold
+
+        FROM OrderItems oi
+
+        INNER JOIN Medicine m
+        ON oi.MedicineID = m.MedicineID
+
+        GROUP BY
+            oi.MedicineID,
+            m.Name
+
+        ORDER BY TotalSold DESC
+
+        LIMIT 1";
+
+                MySqlCommand cmd = new MySqlCommand(query, con);
+
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    lblBestMedicine.Text =
+                        "🥇 " + reader["Name"].ToString();
+
+                    lblUnitsSold.Text =
+                        "Units Sold : " +
+                        reader["TotalSold"].ToString();
+
+                    panelBestSelling.BackColor = 
+                        Color.LemonChiffon;
+                }
+                else
+                {
+                    lblBestMedicine.Text = "No Orders Yet";
+
+                    lblUnitsSold.Text = "Units Sold : 0";
+
+                    panelBestSelling.BackColor = Color.WhiteSmoke;
+                }
+
+                reader.Close();
             }
         }
 
