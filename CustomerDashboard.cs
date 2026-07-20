@@ -64,10 +64,6 @@ namespace SmartMedPharmacyAPP
             txtSearch.Text = "Search for medicines";
             txtSearch.ForeColor = Color.Gray;
 
-            // loading the categories from the database and adding them to the combobox
-            cmbCategory.Items.Clear();
-            cmbCategory.Items.Add("All Categories");
-            cmbCategory.SelectedIndex = 0;
 
             // Hook the events back up now that layout values are set
             txtSearch.TextChanged += txtSearch_TextChanged;
@@ -120,14 +116,16 @@ namespace SmartMedPharmacyAPP
         {
             cmbCategory.Items.Clear();
 
+            // Default option
             cmbCategory.Items.Add("All Categories");
 
             using (MySqlConnection con = new MySqlConnection(DBConnection.ConnectionString))
             {
                 con.Open();
 
-                MySqlCommand cmd =
-                    new MySqlCommand("SELECT DISTINCT Category FROM medicine", con);
+                string query = "SELECT DISTINCT Category FROM Medicine ORDER BY Category";
+
+                MySqlCommand cmd = new MySqlCommand(query, con);
 
                 MySqlDataReader reader = cmd.ExecuteReader();
 
@@ -136,8 +134,10 @@ namespace SmartMedPharmacyAPP
                     cmbCategory.Items.Add(reader["Category"].ToString());
                 }
 
-                cmbCategory.SelectedIndex = 0;
+                reader.Close();
             }
+
+            cmbCategory.SelectedIndex = 0;
         }
 
 
@@ -294,7 +294,7 @@ namespace SmartMedPharmacyAPP
         // event handlers for the search textbox to implement the placeholder text functionality
         private void txtSearch_Enter(object sender, EventArgs e)
         {
-            if (txtSearch.Text == "Search medicines...")
+            if (txtSearch.Text == "Search for medicines")
             {
                 txtSearch.Text = "";
                 txtSearch.ForeColor = Color.Black;
@@ -305,7 +305,7 @@ namespace SmartMedPharmacyAPP
         {
             if (string.IsNullOrWhiteSpace(txtSearch.Text))
             {
-                txtSearch.Text = "Search medicines...";
+                txtSearch.Text = "Search for medicines";
                 txtSearch.ForeColor = Color.Gray;
             }
         }
@@ -317,7 +317,7 @@ namespace SmartMedPharmacyAPP
             string searchText = txtSearch.Text;
 
             // If it's empty or matching the placeholder, show all records
-            if (string.IsNullOrWhiteSpace(searchText) || searchText == "Search medicines...")
+            if (string.IsNullOrWhiteSpace(searchText) || searchText == "Search for medicines")
             {
                 LoadMedicines("", cmbCategory.Text);
             }
@@ -329,16 +329,7 @@ namespace SmartMedPharmacyAPP
 
         private void cmbCategory_SelectedIndexChanged(object sender, EventArgs e)
         {
-            string searchText = txtSearch.Text;
-
-            if (string.IsNullOrWhiteSpace(searchText) || searchText == "Search medicines...")
-            {
-                LoadMedicines("", cmbCategory.Text);
-            }
-            else
-            {
-                LoadMedicines(searchText, cmbCategory.Text);
-            }
+                LoadMedicines(txtSearch.Text, cmbCategory.Text);
         }
 
         private void flpMedicines_Paint(object sender, PaintEventArgs e)
