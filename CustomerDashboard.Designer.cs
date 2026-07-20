@@ -182,7 +182,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(29, 50);
+            this.label1.Location = new System.Drawing.Point(29, 57);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(133, 13);
             this.label1.TabIndex = 2;
@@ -193,7 +193,7 @@
             this.labelTitle.AutoSize = true;
             this.labelTitle.Font = new System.Drawing.Font("Segoe UI", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelTitle.ForeColor = System.Drawing.Color.MidnightBlue;
-            this.labelTitle.Location = new System.Drawing.Point(21, 9);
+            this.labelTitle.Location = new System.Drawing.Point(21, 16);
             this.labelTitle.Name = "labelTitle";
             this.labelTitle.Size = new System.Drawing.Size(239, 37);
             this.labelTitle.TabIndex = 1;
@@ -205,7 +205,7 @@
             this.Searchpanel.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.Searchpanel.Controls.Add(this.cmbCategory);
             this.Searchpanel.Controls.Add(this.txtSearch);
-            this.Searchpanel.Location = new System.Drawing.Point(19, 79);
+            this.Searchpanel.Location = new System.Drawing.Point(19, 89);
             this.Searchpanel.Name = "Searchpanel";
             this.Searchpanel.Size = new System.Drawing.Size(560, 51);
             this.Searchpanel.TabIndex = 0;
