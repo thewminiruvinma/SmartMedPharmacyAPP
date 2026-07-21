@@ -293,49 +293,21 @@ namespace SmartMedPharmacyAPP
                     "Login Required",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
-
                 return;
             }
 
-            // Ask for confirmation before placing the order
-            DialogResult result = MessageBox.Show(
-                "Are you sure you want to place this order?",
-                "Confirm Checkout",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question);
-
-            if (result == DialogResult.No)
-                return;
-
             try
             {
-                using (MySqlConnection con =
-                    new MySqlConnection(DBConnection.ConnectionString))
+                using (MySqlConnection con = new MySqlConnection(DBConnection.ConnectionString))
                 {
                     con.Open();
 
-                    // Start Database Transaction
-                    MySqlTransaction transaction = con.BeginTransaction();
-
-                    try
+                    // Check if cart is empty BEFORE starting a transaction
+                    string checkCartQuery = @"SELECT COUNT(*) FROM Cart WHERE CustomerID=@CustomerID";
+                    using (MySqlCommand checkCartCmd = new MySqlCommand(checkCartQuery, con))
                     {
-                        // STEP 1 - Check whether the cart is empty
-                        
-
-                        string checkCartQuery =
-                        @"SELECT COUNT(*)
-                  FROM Cart
-                  WHERE CustomerID=@CustomerID";
-
-                        MySqlCommand checkCartCmd =
-                            new MySqlCommand(checkCartQuery, con, transaction);
-
-                        checkCartCmd.Parameters.AddWithValue(
-                            "@CustomerID",
-                            Session.CustomerID);
-
-                        int cartCount =
-                            Convert.ToInt32(checkCartCmd.ExecuteScalar());
+                        checkCartCmd.Parameters.AddWithValue("@CustomerID", Session.CustomerID);
+                        int cartCount = Convert.ToInt32(checkCartCmd.ExecuteScalar());
 
                         if (cartCount == 0)
                         {
@@ -344,226 +316,123 @@ namespace SmartMedPharmacyAPP
                                 "Checkout",
                                 MessageBoxButtons.OK,
                                 MessageBoxIcon.Warning);
-
-                            transaction.Rollback();
-                            return;
+                            return; // Clean exit without transaction issues
                         }
+                    }
 
-                        // STEP 2 - Calculate Total Amount
-                        
+                    // Ask for confirmation ONLY if cart has items
+                    DialogResult result = MessageBox.Show(
+                        "Are you sure you want to place this order?",
+                        "Confirm Checkout",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Question);
 
-                        string totalQuery =
-                        @"SELECT IFNULL(SUM(SubTotal),0)
-                  FROM Cart
-                  WHERE CustomerID=@CustomerID";
+                    if (result == DialogResult.No)
+                        return;
 
-                        MySqlCommand totalCmd =
-                            new MySqlCommand(totalQuery, con, transaction);
-
-                        totalCmd.Parameters.AddWithValue(
-                            "@CustomerID",
-                            Session.CustomerID);
-
-                        decimal total =
-                            Convert.ToDecimal(totalCmd.ExecuteScalar());
-
-                        
-                        // STEP 3 - Create Order
-                        
-
-                        string orderQuery =
-                        @"INSERT INTO Orders
-                (CustomerID,OrderDate,TotalAmount,Status)
-
-                VALUES
-
-                (@CustomerID,@OrderDate,@TotalAmount,'Processing')";
-
-                        MySqlCommand orderCmd =
-                            new MySqlCommand(orderQuery, con, transaction);
-
-                        orderCmd.Parameters.AddWithValue(
-                            "@CustomerID",
-                            Session.CustomerID);
-
-                        orderCmd.Parameters.AddWithValue(
-                            "@OrderDate",
-                            DateTime.Now);
-
-                        orderCmd.Parameters.AddWithValue(
-                            "@TotalAmount",
-                            total);
-
-                        orderCmd.ExecuteNonQuery();
-
-                        // Get newly created OrderID
-                        int orderID =
-                            Convert.ToInt32(orderCmd.LastInsertedId);
-
-                        
-                        // STEP 4 - Read Customer Cart
-                        
-
-                        string cartQuery =
-                        @"SELECT *
-                  FROM Cart
-                  WHERE CustomerID=@CustomerID";
-
-                        MySqlCommand cartCmd =
-                            new MySqlCommand(cartQuery, con, transaction);
-
-                        cartCmd.Parameters.AddWithValue(
-                            "@CustomerID",
-                            Session.CustomerID);
-
-                        MySqlDataReader reader =
-                            cartCmd.ExecuteReader();
-
-                        DataTable cartTable =
-                            new DataTable();
-
-                        cartTable.Load(reader);
-
-                        reader.Close();
-
-                        
-                        // STEP 5 - Save Order Items
-                        
-
-                        foreach (DataRow row in cartTable.Rows)
+                    // Start Transaction now that we know we have work to do
+                    using (MySqlTransaction transaction = con.BeginTransaction())
+                    {
+                        try
                         {
-                            
-                            // Check Medicine Stock
-                            
+                            // Calculate Total Amount
+                            string totalQuery = @"SELECT IFNULL(SUM(SubTotal),0) FROM Cart WHERE CustomerID=@CustomerID";
+                            MySqlCommand totalCmd = new MySqlCommand(totalQuery, con, transaction);
+                            totalCmd.Parameters.AddWithValue("@CustomerID", Session.CustomerID);
+                            decimal total = Convert.ToDecimal(totalCmd.ExecuteScalar());
 
-                            string stockCheck =
-                            @"SELECT StockQuantity
-                      FROM Medicine
-                      WHERE MedicineID=@MedicineID";
+                            // Create Order
+                            string orderQuery = @"INSERT INTO Orders (CustomerID, OrderDate, TotalAmount, Status)
+                                          VALUES (@CustomerID, @OrderDate, @TotalAmount, 'Processing')";
+                            MySqlCommand orderCmd = new MySqlCommand(orderQuery, con, transaction);
+                            orderCmd.Parameters.AddWithValue("@CustomerID", Session.CustomerID);
+                            orderCmd.Parameters.AddWithValue("@OrderDate", DateTime.Now);
+                            orderCmd.Parameters.AddWithValue("@TotalAmount", total);
+                            orderCmd.ExecuteNonQuery();
 
-                            MySqlCommand stockCheckCmd =
-                                new MySqlCommand(stockCheck, con, transaction);
+                            int orderID = Convert.ToInt32(orderCmd.LastInsertedId);
 
-                            stockCheckCmd.Parameters.AddWithValue(
-                                "@MedicineID",
-                                row["MedicineID"]);
+                            // Read Customer Cart
+                            string cartQuery = @"SELECT * FROM Cart WHERE CustomerID=@CustomerID";
+                            MySqlCommand cartCmd = new MySqlCommand(cartQuery, con, transaction);
+                            cartCmd.Parameters.AddWithValue("@CustomerID", Session.CustomerID);
 
-                            int currentStock =
-                                Convert.ToInt32(stockCheckCmd.ExecuteScalar());
-
-                            int orderedQty =
-                                Convert.ToInt32(row["Quantity"]);
-
-                            if (orderedQty > currentStock)
+                            DataTable cartTable = new DataTable();
+                            using (MySqlDataReader reader = cartCmd.ExecuteReader())
                             {
-                                throw new Exception(
-                                    "Insufficient stock for Medicine ID: "
-                                    + row["MedicineID"]);
+                                cartTable.Load(reader);
                             }
 
+                            // Save Order Items & Adjust Stock
+                            foreach (DataRow row in cartTable.Rows)
+                            {
+                                // Check Medicine Stock
+                                string stockCheck = @"SELECT Name, StockQuantity FROM Medicine WHERE MedicineID=@MedicineID";
+                                MySqlCommand stockCheckCmd = new MySqlCommand(stockCheck, con, transaction);
+                                stockCheckCmd.Parameters.AddWithValue("@MedicineID", row["MedicineID"]);
 
-                            // Insert into OrderItems
+                                using (MySqlDataReader reader = stockCheckCmd.ExecuteReader())
+                                {
+                                    if (reader.Read())
+                                    {
+                                        string medicineName = reader["Name"].ToString();
+                                        int currentStock = Convert.ToInt32(reader["StockQuantity"]);
+                                        int orderedQty = Convert.ToInt32(row["Quantity"]);
 
+                                        // Handle completely out of stock
+                                        if (currentStock <= 0)
+                                        {
+                                            throw new Exception($"'{medicineName}' is currently out of stock and cannot be purchased.");
+                                        }
 
-                            string itemQuery =
-                                      @"INSERT INTO OrderItems
-                                    (OrderID,MedicineID,Quantity,UnitPrice)
+                                        // Handle insufficient stock
+                                        if (orderedQty > currentStock)
+                                        {
+                                            throw new Exception($"Only {currentStock} unit(s) left in stock for '{medicineName}'. Please adjust your cart.");
+                                        }
+                                    }
+                                }
 
-                                    VALUES
+                                // Insert into OrderItems
+                                string itemQuery = @"INSERT INTO OrderItems (OrderID, MedicineID, Quantity, UnitPrice)
+                                             VALUES (@OrderID, @MedicineID, @Quantity, @UnitPrice)";
+                                MySqlCommand itemCmd = new MySqlCommand(itemQuery, con, transaction);
+                                itemCmd.Parameters.AddWithValue("@OrderID", orderID);
+                                itemCmd.Parameters.AddWithValue("@MedicineID", row["MedicineID"]);
+                                itemCmd.Parameters.AddWithValue("@Quantity", row["Quantity"]);
+                                itemCmd.Parameters.AddWithValue("@UnitPrice", row["Price"]);
+                                itemCmd.ExecuteNonQuery();
 
-                                    (@OrderID,@MedicineID,@Quantity,@UnitPrice)";
+                                // Reduce Medicine Stock
+                                string updateStock = @"UPDATE Medicine SET StockQuantity = StockQuantity - @Quantity WHERE MedicineID=@MedicineID";
+                                MySqlCommand stockCmd = new MySqlCommand(updateStock, con, transaction);
+                                stockCmd.Parameters.AddWithValue("@Quantity", row["Quantity"]);
+                                stockCmd.Parameters.AddWithValue("@MedicineID", row["MedicineID"]);
+                                stockCmd.ExecuteNonQuery();
+                            }
 
-                            MySqlCommand itemCmd =
-                                new MySqlCommand(itemQuery, con, transaction);
+                            // STEP 6 - Clear Customer Cart
+                            string deleteCart = @"DELETE FROM Cart WHERE CustomerID=@CustomerID";
+                            MySqlCommand deleteCmd = new MySqlCommand(deleteCart, con, transaction);
+                            deleteCmd.Parameters.AddWithValue("@CustomerID", Session.CustomerID);
+                            deleteCmd.ExecuteNonQuery();
 
-                            itemCmd.Parameters.AddWithValue(
-                                "@OrderID",
-                                orderID);
+                            // STEP 7 - Commit Transaction
+                            transaction.Commit();
 
-                            itemCmd.Parameters.AddWithValue(
-                                "@MedicineID",
-                                row["MedicineID"]);
-
-                            itemCmd.Parameters.AddWithValue(
-                                "@Quantity",
-                                row["Quantity"]);
-
-                            itemCmd.Parameters.AddWithValue(
-                                "@UnitPrice", 
-                                row["Price"]);
-
-                            itemCmd.ExecuteNonQuery();
-
-                            
-                            // Reduce Medicine Stock
-                            
-
-                            string updateStock =
-                            @"UPDATE Medicine
-
-                    SET StockQuantity =
-                    StockQuantity-@Quantity
-
-                    WHERE MedicineID=@MedicineID";
-
-                            MySqlCommand stockCmd =
-                                new MySqlCommand(updateStock, con, transaction);
-
-                            stockCmd.Parameters.AddWithValue(
-                                "@Quantity",
-                                row["Quantity"]);
-
-                            stockCmd.Parameters.AddWithValue(
-                                "@MedicineID",
-                                row["MedicineID"]);
-
-                            stockCmd.ExecuteNonQuery();
+                            // STEP 8 - Refresh UI & Display Success
+                            LoadCart();
+                            MessageBox.Show(
+                                "🎉 Your order has been placed successfully!",
+                                "Order Successful",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Information);
                         }
-
-                        
-                        // STEP 6 - Clear Customer Cart
-                        
-
-                        string deleteCart =
-                        @"DELETE FROM Cart
-                  WHERE CustomerID=@CustomerID";
-
-                        MySqlCommand deleteCmd =
-                            new MySqlCommand(deleteCart, con, transaction);
-
-                        deleteCmd.Parameters.AddWithValue(
-                            "@CustomerID",
-                            Session.CustomerID);
-
-                        deleteCmd.ExecuteNonQuery();
-
-                        
-                        // STEP 7 - Save Everything
-                        
-
-                        transaction.Commit();
-
-                        
-                        // STEP 8 - Refresh Cart
-                        
-
-                        LoadCart();
-
-                        
-                        // STEP 9 - Success Message
-                        
-
-                        MessageBox.Show(
-                            "🎉 Your order has been placed successfully!",
-                            "Order Successful",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Information);
-                    }
-                    catch (Exception)
-                    {
-                        // If any error occurs, cancel everything
-                        transaction.Rollback();
-                        throw;
+                        catch
+                        {
+                            transaction.Rollback();
+                            throw; // Passes error to outer catch block cleanly
+                        }
                     }
                 }
             }

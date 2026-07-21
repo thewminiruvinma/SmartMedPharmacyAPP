@@ -59,6 +59,7 @@ namespace SmartMedPharmacyAPP
 
             LoadMedicines();
             LoadCategories();
+            
 
             // setting the placeholder text for the search textbox
             txtSearch.Text = "Search for medicines";
@@ -146,16 +147,14 @@ namespace SmartMedPharmacyAPP
         {
             // Extract the MedicineID right away so the button click knows which item it belongs to
             int medicineID = Convert.ToInt32(reader["MedicineID"]);
+            int stockQuantity = Convert.ToInt32(reader["StockQuantity"]);
 
             Panel card = new Panel();
 
             card.Width = 220;
             card.Height = 270;
-
             card.BackColor = Color.White;
-
             card.BorderStyle = BorderStyle.FixedSingle;
-
             card.Margin = new Padding(15);
 
 
@@ -200,12 +199,36 @@ namespace SmartMedPharmacyAPP
             btnAdd.BackColor = Color.MidnightBlue;
             btnAdd.ForeColor = Color.White;
 
-            // Step 4: Wire up the click event handler to execute your AddToCart method
-            btnAdd.Click += (sender, e) =>
+            // Wire up the click event handler to execute your AddToCart method
+            if (stockQuantity <= 0)
             {
-                AddToCart(medicineID);
-            };
+                lblStock.Text = "Stock : Out of Stock";
+                lblStock.ForeColor = Color.Red;
+                lblStock.Font = new Font("Segoe UI", 9, FontStyle.Bold);
 
+                btnAdd.Text = "Out of Stock";
+                btnAdd.BackColor = Color.Gray;
+                btnAdd.ForeColor = Color.White;
+                btnAdd.Enabled = false; // Disable button when out of stock
+            }
+            else
+            {
+                lblStock.Text = "Stock : " + stockQuantity;
+                lblStock.ForeColor = Color.Black;
+
+                btnAdd.Text = "Add To Cart";
+                btnAdd.BackColor = Color.MidnightBlue;
+                btnAdd.ForeColor = Color.White;
+                btnAdd.Enabled = true;
+
+                // Wire up the click event handler
+                btnAdd.Click += (sender, e) =>
+                {
+                    AddToCart(medicineID);
+                };
+            }
+
+            card.Controls.Add(lblStock);
             card.Controls.Add(btnAdd);
 
             return card;
@@ -217,26 +240,33 @@ namespace SmartMedPharmacyAPP
             {
                 con.Open();
 
-                // Get the medicine price
+                // 1. Fetch current stock and price directly from the DB
+                string medicineQuery = "SELECT Price, StockQuantity FROM Medicine WHERE MedicineID=@MedicineID";
+                MySqlCommand medicineCmd = new MySqlCommand(medicineQuery, con);
+                medicineCmd.Parameters.AddWithValue("@MedicineID", medicineID);
+
                 decimal price = 0;
+                int currentStock = 0;
 
-                string priceQuery = "SELECT Price FROM Medicine WHERE MedicineID=@MedicineID";
-
-                MySqlCommand priceCmd = new MySqlCommand(priceQuery, con);
-                priceCmd.Parameters.AddWithValue("@MedicineID", medicineID);
-
-                object priceResult = priceCmd.ExecuteScalar();
-
-                if (priceResult != null)
+                using (MySqlDataReader reader = medicineCmd.ExecuteReader())
                 {
-                    price = Convert.ToDecimal(priceResult);
+                    if (reader.Read())
+                    {
+                        price = Convert.ToDecimal(reader["Price"]);
+                        currentStock = Convert.ToInt32(reader["StockQuantity"]);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Medicine not found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
                 }
 
-                // Check if medicine already exists in cart
+                // 2. Check if medicine already exists in cart
                 string checkQuery = @"SELECT Quantity
-                              FROM Cart
-                              WHERE CustomerID=@CustomerID
-                              AND MedicineID=@MedicineID";
+                                      FROM Cart
+                                      WHERE CustomerID=@CustomerID
+                                      AND MedicineID=@MedicineID";
 
                 MySqlCommand checkCmd = new MySqlCommand(checkQuery, con);
                 checkCmd.Parameters.AddWithValue("@CustomerID", Session.CustomerID);
@@ -246,17 +276,25 @@ namespace SmartMedPharmacyAPP
 
                 if (result != null)
                 {
-                    // Medicine already exists
+                    int currentCartQty = Convert.ToInt32(result);
 
-                    int quantity = Convert.ToInt32(result) + 1;
+                    // Verify if adding 1 more exceeds available stock
+                    if (currentCartQty + 1 > currentStock)
+                    {
+                        MessageBox.Show($"Cannot add more. Only {currentStock} unit(s) available in stock.",
+                                        "Stock Limit Reached", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+
+                    int quantity = currentCartQty + 1;
                     decimal subtotal = quantity * price;
 
                     string updateQuery = @"UPDATE Cart
-                                   SET Quantity=@Quantity,
-                                       Price=@Price,
-                                       SubTotal=@SubTotal
-                                   WHERE CustomerID=@CustomerID
-                                   AND MedicineID=@MedicineID";
+                                           SET Quantity=@Quantity,
+                                               Price=@Price,
+                                               SubTotal=@SubTotal
+                                           WHERE CustomerID=@CustomerID
+                                           AND MedicineID=@MedicineID";
 
                     MySqlCommand updateCmd = new MySqlCommand(updateQuery, con);
 

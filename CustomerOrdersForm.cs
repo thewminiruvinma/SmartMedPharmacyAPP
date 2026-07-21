@@ -61,6 +61,14 @@ namespace SmartMedPharmacyAPP
 
         private void CustomerOrdersForm_Load(object sender, EventArgs e)
         {
+            // Reset and load ComboBox items dynamically
+            cmbStatus.Items.Clear();
+            cmbStatus.Items.Add("All");
+            cmbStatus.Items.Add("Processing");
+            cmbStatus.Items.Add("In Delivery");
+            cmbStatus.Items.Add("Delivered");
+            cmbStatus.Items.Add("Cancelled");
+
             // Search Box Placeholder
             txtSearch.Text = searchPlaceholder;
             txtSearch.ForeColor = Color.Gray;
@@ -74,6 +82,16 @@ namespace SmartMedPharmacyAPP
 
         private void LoadOrders(string search = "", string status = "")
         {
+            // Extract clean values ignoring placeholders
+            string searchVal = (txtSearch.ForeColor == Color.Gray || txtSearch.Text == searchPlaceholder)
+                ? ""
+                : txtSearch.Text.Trim();
+
+            string statusVal = (cmbStatus.ForeColor == Color.Gray || cmbStatus.Text == categoryPlaceholder || cmbStatus.Text == "All")
+                ? ""
+                : cmbStatus.Text.Trim();
+
+            // Load orders from the database based on search and status
             using (MySqlConnection con =
                 new MySqlConnection(DBConnection.ConnectionString))
             {
