@@ -411,16 +411,16 @@ namespace SmartMedPharmacyAPP
                                 stockCmd.ExecuteNonQuery();
                             }
 
-                            // STEP 6 - Clear Customer Cart
+                            // Clear Customer Cart
                             string deleteCart = @"DELETE FROM Cart WHERE CustomerID=@CustomerID";
                             MySqlCommand deleteCmd = new MySqlCommand(deleteCart, con, transaction);
                             deleteCmd.Parameters.AddWithValue("@CustomerID", Session.CustomerID);
                             deleteCmd.ExecuteNonQuery();
 
-                            // STEP 7 - Commit Transaction
+                            // Commit Transaction
                             transaction.Commit();
 
-                            // STEP 8 - Refresh UI & Display Success
+                            // Refresh UI & Display Success
                             LoadCart();
                             MessageBox.Show(
                                 "🎉 Your order has been placed successfully!",
